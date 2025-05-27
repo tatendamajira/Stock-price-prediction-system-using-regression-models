@@ -1,0 +1,434 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="card-container">
+        <div class="form-card">
+            <div class="card-header">
+                <div class="header-gradient">
+                    <i class="fas fa-chart-line"></i>
+                    <h1>AI Stock Prediction Engine</h1>
+                    <p class="header-subtitle">Advanced Market Forecasting System</p>
+                </div>
+            </div>
+            
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <!-- Stock Symbol Input -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-tag"></i>
+                        Equity Symbol
+                    </label>
+                    <div class="input-container">
+                        <input type="text" 
+                               name="symbol" 
+                               class="form-input"
+                               placeholder="AAPL"
+                               required
+                               pattern="[A-Za-z]{1,5}">
+                        <div class="input-border"></div>
+                        <div class="validation-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            Valid ticker symbol required
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Model Selection -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-project-diagram"></i>
+                        Algorithm Selection
+                    </label>
+                    <div class="custom-select">
+                        <select name="model_type" class="form-control" id="modelType">
+                            <option value="random_forest">Random Forest</option>
+                            <option value="linear">Linear Regression</option>
+                            <option value="polynomial">Polynomial Regression</option>
+                            <option value="svm">Support Vector Machine</option>
+                            <option value="xgboost">XGBoost</option>
+                            <option value="gradient_boosting">Gradient Boosting</option>
+                        </select>
+                        <div class="select-arrow"></div>
+                    </div>
+                </div>
+
+                <!-- Dynamic Parameters -->
+                <div class="parameter-container">
+                    <div class="form-group model-params" id="svmParams">
+                        <label class="form-label">
+                            <i class="fas fa-cog"></i>
+                            SVM Configuration
+                        </label>
+                        <div class="custom-select">
+                            <select name="svm_kernel" class="form-control">
+                                <option value="rbf">Radial Basis Function</option>
+                                <option value="linear">Linear Kernel</option>
+                                <option value="poly">Polynomial Kernel</option>
+                            </select>
+                            <div class="select-arrow"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group model-params" id="xgboostParams">
+                        <label class="form-label">
+                            <i class="fas fa-sliders-h"></i>
+                            XGBoost Parameters
+                        </label>
+                        <div class="input-container">
+                            <input type="number" 
+                                   name="xgboost_estimators" 
+                                   class="form-input"
+                                   value="100"
+                                   min="1"
+                                   placeholder="Number of estimators">
+                            <div class="input-border"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Test Size Input -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-balance-scale-right"></i>
+                        Validation Split
+                    </label>
+                    <div class="input-container">
+                        <input type="number" 
+                               name="test_size" 
+                               class="form-input"
+                               value="0.25"
+                               step="0.05"
+                               min="0.1"
+                               max="0.3"
+                               required>
+                        <div class="input-border"></div>
+                        <div class="range-indicator">Recommended: 0.1 - 0.3</div>
+                        <div class="validation-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            Valid range required
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="submit-btn">
+                    <span class="btn-content">
+                        <i class="fas fa-rocket"></i>
+                        Launch Model Training
+                    </span>
+                    <div class="btn-loader">
+                        <div class="loader-spinner"></div>
+                    </div>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #3498db, #2ecc71);
+        --accent-blue: #3b82f6;
+        --text-dark: #1e293b;
+        --text-light: #64748b;
+        --border-radius: 16px;
+        --transition-speed: 0.3s;
+        --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-container {
+        max-width: 640px;
+        margin: 4rem auto;
+        perspective: 1000px;
+    }
+
+    .form-card {
+        background: #ffffff;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-lg);
+        transform-style: preserve-3d;
+        transition: transform var(--transition-speed);
+        overflow: hidden;
+    }
+
+    .header-gradient {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 3rem 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .header-gradient::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, 
+            rgba(255,255,255,0.1) 25%,
+            transparent 25%,
+            transparent 50%,
+            rgba(255,255,255,0.1) 50%,
+            rgba(255,255,255,0.1) 75%,
+            transparent 75%);
+        background-size: 3px 3px;
+        opacity: 0.1;
+    }
+
+    .header-gradient i {
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .header-gradient h1 {
+        font-weight: 700;
+        letter-spacing: -0.025em;
+        margin-bottom: 0.5rem;
+        font-size: 1.8rem;
+    }
+
+    .header-subtitle {
+        font-weight: 400;
+        opacity: 0.9;
+        font-size: 0.95rem;
+    }
+
+    .form-group {
+        padding: 1.5rem 2rem;
+        transition: all var(--transition-speed);
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--text-dark);
+        font-weight: 500;
+        margin-bottom: 1rem;
+        font-size: 0.95rem;
+    }
+
+    .input-container {
+        position: relative;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 1rem 1.25rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all var(--transition-speed);
+        background: #f8fafc;
+    }
+
+    .form-input:focus {
+        background: white;
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .custom-select {
+        position: relative;
+    }
+
+    .custom-select select {
+        width: 100%;
+        padding: 1rem 1.25rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        appearance: none;
+        background: #f8fafc;
+    }
+
+    .select-arrow {
+        position: absolute;
+        right: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 5px solid var(--text-dark);
+        pointer-events: none;
+    }
+
+    .parameter-container {
+        max-height: 400px;
+        overflow: hidden;
+        transition: max-height var(--transition-speed);
+    }
+
+    .model-params {
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: all var(--transition-speed);
+        height: 0;
+        padding: 0 2rem;
+        margin: 0;
+    }
+
+    .model-params.active {
+        opacity: 1;
+        transform: translateY(0);
+        height: auto;
+        padding: 1.5rem 2rem;
+        margin: 0.5rem 0;
+    }
+
+    .submit-btn {
+        width: calc(100% - 4rem);
+        margin: 2rem;
+        padding: 1.25rem;
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s ease;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    @media (max-width: 640px) {
+        .card-container {
+            margin: 2rem 1rem;
+        }
+        
+        .form-group {
+            padding: 1.25rem;
+        }
+        
+        .submit-btn {
+            width: calc(100% - 2rem);
+            margin: 1rem;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const modelSelect = document.getElementById('modelType');
+    const paramsContainers = document.querySelectorAll('.model-params');
+
+    // Model parameter visibility handler
+    function updateModelParams() {
+        const selectedModel = modelSelect.value;
+        paramsContainers.forEach(container => {
+            const isActive = container.id === `${selectedModel}Params`;
+            container.classList.toggle('active', isActive);
+        });
+    }
+
+    // Initialize parameters
+    updateModelParams();
+    modelSelect.addEventListener('change', updateModelParams);
+
+    // Form submission handler
+    const form = document.querySelector('form');
+    form.addEventListener('submit', (e) => {
+        if (!form.checkValidity()) {
+            e.preventDefault();
+            form.classList.add('was-validated');
+        } else {
+            const submitBtn = document.querySelector('.submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.querySelector('.btn-content').style.opacity = '0';
+            submitBtn.querySelector('.btn-loader').style.display = 'flex';
+        }
+    });
+
+    // Dynamic input validation
+    document.querySelectorAll('.form-input').forEach(input => {
+        input.addEventListener('input', () => {
+            const validationMsg = input.parentElement.querySelector('.validation-message');
+            if (input.validity.valid) {
+                validationMsg.style.display = 'none';
+                input.parentElement.classList.remove('invalid');
+            } else {
+                validationMsg.style.display = 'flex';
+                input.parentElement.classList.add('invalid');
+            }
+        });
+    });
+});
+</script>
+
+<style>
+    /* Add this to your CSS */
+    .submit-btn {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-content {
+        display: flex;
+        align-items: center;
+        transition: opacity 0.3s ease;
+    }
+
+    .btn-loader {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: inherit;
+    }
+
+    .loader-spinner {
+        width: 24px;
+        height: 24px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    form.submitting .btn-content {
+        opacity: 0;
+    }
+
+    form.submitting .btn-loader {
+        display: flex;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('form');
+    
+    form.addEventListener('submit', (e) => {
+        if (!form.checkValidity()) {
+            e.preventDefault();
+            form.classList.add('was-validated');
+        } else {
+            // Add submitting class to form
+            form.classList.add('submitting');
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,507 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #2c3e50, #3498db);
+        --bullish-gradient: linear-gradient(45deg, #27ae60, #2ecc71);
+        --bearish-gradient: linear-gradient(45deg, #e74c3c, #c0392b);
+        --neutral-gradient: linear-gradient(45deg, #95a5a6, #7f8c8d);
+        --card-shadow: 0 12px 40px rgba(0,0,0,0.08);
+    }
+
+    .analysis-header {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 4rem 2rem;
+        border-radius: 24px;
+        margin-bottom: 3rem;
+        box-shadow: var(--card-shadow);
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+        transition: all 0.4s ease;
+    }
+
+    .analysis-header:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 45px rgba(0,0,0,0.15);
+    }
+
+    .analysis-header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.1) 0%, transparent 50%);
+    }
+
+    .analysis-header h1 {
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        position: relative;
+        z-index: 2;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .prediction-container {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .prediction-badge {
+        font-size: 1.5rem;
+        padding: 1rem 2.5rem;
+        border-radius: 50px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 1rem;
+        backdrop-filter: blur(8px);
+        border: 2px solid rgba(255,255,255,0.3);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .prediction-badge:hover {
+        transform: scale(1.05) translateY(-3px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    }
+
+    .bullish { background: var(--bullish-gradient); }
+    .bearish { background: var(--bearish-gradient); }
+    .neutral { background: var(--neutral-gradient); }
+
+    .confidence-meter {
+        font-size: 1.2rem;
+        background: rgba(255,255,255,0.2);
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255,255,255,0.3);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+    .confidence-meter:hover {
+        background: rgba(255,255,255,0.25);
+        transform: translateY(-2px);
+    }
+
+    .sentiment-card {
+        background: rgba(255,255,255,0.98);
+        border-radius: 24px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--card-shadow);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .sentiment-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--primary-gradient);
+    }
+
+    .sentiment-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+    }
+
+    .sentiment-card h3 {
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+    }
+
+    .sentiment-card h3 i {
+        margin-right: 1rem;
+        font-size: 1.5rem;
+        color: #3498db;
+    }
+
+    .avg-sentiment {
+        padding: 1.5rem;
+        background: rgba(52, 152, 219, 0.05);
+        border-radius: 16px;
+        margin-bottom: 2.5rem;
+    }
+
+    .avg-sentiment h5 {
+        font-weight: 500;
+        color: #7f8c8d;
+    }
+
+    .display-2 {
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .sentiment-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sentiment-list li {
+        padding: 1.5rem;
+        margin: 1.2rem 0;
+        background: #f8f9fa;
+        border-radius: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+
+    .sentiment-list li:hover {
+        background: rgba(52,152,219,0.08);
+        transform: translateX(10px);
+        border-left-color: #3498db;
+    }
+
+    .sentiment-list li i {
+        font-size: 1.2rem;
+        margin-right: 1rem;
+    }
+
+    .sentiment-list .badge {
+        padding: 0.6rem 1rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .chart-container {
+        background: rgba(255,255,255,0.98);
+        padding: 2.5rem;
+        border-radius: 24px;
+        box-shadow: var(--card-shadow);
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .chart-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+    }
+
+    .chart-container h3 {
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+    }
+
+    .chart-container h3 i {
+        margin-right: 1rem;
+        font-size: 1.5rem;
+        color: #3498db;
+    }
+
+    .chart-container img {
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+    }
+
+    .chart-container img:hover {
+        transform: scale(1.02);
+    }
+
+    .news-articles {
+        margin-top: 3rem;
+    }
+
+    .news-articles h2 {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .news-articles h2 i {
+        margin-right: 1rem;
+        font-size: 1.8rem;
+        color: #3498db;
+    }
+
+    .news-articles .card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+        margin-bottom: 2.5rem;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        background: rgba(255,255,255,0.98);
+        overflow: hidden;
+    }
+
+    .news-articles .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    .article-meta {
+        color: #6c757d;
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .source-badge {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 0.4rem 1.2rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        box-shadow: 0 2px 8px rgba(44, 62, 80, 0.1);
+    }
+
+    .card-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: #2c3e50;
+        line-height: 1.4;
+    }
+
+    .card-text {
+        color: #6c757d;
+        line-height: 1.7;
+        margin-bottom: 2rem;
+    }
+
+    .btn-read {
+        background: var(--primary-gradient);
+        color: white !important;
+        padding: 1rem 2.5rem;
+        border-radius: 50px;
+        display: inline-flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+        font-weight: 500;
+        text-decoration: none !important;
+        border: none;
+        box-shadow: 0 4px 15px rgba(44, 62, 80, 0.1);
+    }
+
+    .btn-read:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(44, 62, 80, 0.15);
+        color: white;
+    }
+
+    .btn-read i {
+        transition: transform 0.3s ease;
+    }
+
+    .btn-read:hover i {
+        transform: translateX(5px);
+    }
+
+    @media (max-width: 992px) {
+        .analysis-header {
+            padding: 3rem 1.5rem;
+        }
+        
+        .sentiment-card, .chart-container {
+            padding: 2rem;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .analysis-header {
+            padding: 2.5rem 1.5rem;
+            border-radius: 18px;
+        }
+        
+        .prediction-badge {
+            font-size: 1.3rem;
+            padding: 0.8rem 2rem;
+        }
+        
+        .confidence-meter {
+            font-size: 1.1rem;
+            padding: 0.8rem 1.5rem;
+        }
+        
+        .sentiment-card, .chart-container {
+            padding: 1.8rem;
+            border-radius: 18px;
+        }
+        
+        .card-title {
+            font-size: 1.3rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .analysis-header h1 {
+            font-size: 1.8rem;
+        }
+        
+        .sentiment-list li {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+        
+        .article-meta {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+    }
+</style>
+
+<div class="analysis-header">
+    <h1>📰 News Analysis for {{ symbol }}</h1>
+    <div class="prediction-container">
+        <span class="prediction-badge {{ prediction }}">
+            {% if prediction == 'bullish' %}
+                🚀 {{ prediction|title }}
+            {% elif prediction == 'bearish' %}
+                🐻 {{ prediction|title }}
+            {% else %}
+                ⚖️ {{ prediction|title }}
+            {% endif %}
+        </span>
+        <div class="confidence-meter">
+            <i class="fas fa-shield-alt me-2"></i>
+            {{ confidence }} Confidence Level
+        </div>
+    </div>
+</div>
+
+{% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+{% else %}
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="sentiment-card">
+                <h3><i class="fas fa-analytics me-2"></i>Sentiment Breakdown</h3>
+                
+                <div class="avg-sentiment">
+                    <h5>Average Sentiment Score</h5>
+                    <div class="display-2 fw-bold">{{ avg_sentiment }}</div>
+                    <small class="text-muted">Scale from -1 (Negative) to 1 (Positive)</small>
+                </div>
+
+                <h4><i class="fas fa-chart-pie me-2"></i>Sentiment Distribution</h4>
+                <ul class="sentiment-list">
+                    {% for key, value in sentiment_distribution.items %}
+                    <li>
+                        <span class="d-flex align-items-center">
+                            <i class="fas fa-circle me-3 
+                                {% if key == 'positive' %}text-success
+                                {% elif key == 'negative' %}text-danger
+                                {% else %}text-secondary{% endif %}"></i>
+                            <span>{{ key|title }}</span>
+                        </span>
+                        <span class="badge bg-light text-dark">{{ value }}%</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="chart-container">
+                <h3><i class="fas fa-chart-line me-2"></i>Sentiment Trend</h3>
+                <img src="data:image/png;base64,{{ sentiment_image }}" 
+                     alt="Sentiment Trend Chart" class="img-fluid w-100">
+                <p class="text-muted mt-3 mb-0">Sentiment trend over the last 30 days</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="news-articles">
+        <h2><i class="fas fa-newspaper me-2"></i>Key News Articles</h2>
+        <div class="row">
+            {% for article in articles %}
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="article-meta">
+                            <span class="source-badge">{{ article.source.name }}</span>
+                            <span class="text-muted">{{ article.publishedAt|date:"M d, Y" }}</span>
+                            <span class="text-muted">{{ article.publishedAt|timesince }} ago</span>
+                        </div>
+                        <h3 class="card-title">{{ article.title }}</h3>
+                        <p class="card-text">{{ article.description }}</p>
+                        <a href="{{ article.url }}" target="_blank" class="btn-read">
+                            Read Full Analysis
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+<script>
+    // Add animation to elements when they come into view
+    document.addEventListener('DOMContentLoaded', function() {
+        const animateOnScroll = function() {
+            const elements = document.querySelectorAll('.sentiment-card, .chart-container, .card');
+            
+            elements.forEach(element => {
+                const elementPosition = element.getBoundingClientRect().top;
+                const screenPosition = window.innerHeight / 1.2;
+                
+                if (elementPosition < screenPosition) {
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }
+            });
+        };
+        
+        // Set initial state
+        const animatedElements = document.querySelectorAll('.sentiment-card, .chart-container, .card');
+        animatedElements.forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1)';
+        });
+        
+        // Trigger on load and scroll
+        animateOnScroll();
+        window.addEventListener('scroll', animateOnScroll);
+    });
+</script>
+
+{% endblock %}

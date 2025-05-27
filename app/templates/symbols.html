@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+        text-align: center;
+        padding: 20px;
+    }
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    h2 {
+        color: #333;
+        margin-bottom: 20px;
+    }
+    input {
+        width: 80%;
+        padding: 10px;
+        font-size: 16px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    .symbol-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 10px;
+        padding: 0;
+        list-style-type: none;
+    }
+    .symbol-item {
+        background: linear-gradient(135deg, #3498db, #2ecc71);
+        color: white;
+        padding: 10px;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 5px;
+        transition: 0.3s;
+        cursor: pointer;
+    }
+    .symbol-item:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .fetch-link {
+        background: linear-gradient(135deg, #3498db 0%, #2ecc71 100%);
+        color: white;
+        padding: 1.25rem 3rem;
+        border-radius: 2.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        display: inline-flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 8px 24px rgba(52, 152, 219, 0.3);
+        position: relative;
+        overflow: hidden;
+        border: none;
+        margin: 2rem 0;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .fetch-link:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 12px 32px rgba(52, 152, 219, 0.4);
+        background: linear-gradient(135deg, #2ecc71 0%, #3498db 100%);
+        color: white;
+    }
+    .fetch-link i {
+        font-size: 1.4rem;
+        transition: transform 0.4s ease;
+    }
+    .fetch-link:hover i {
+        transform: rotate(360deg);
+    }
+    .fetch-link::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+            45deg,
+            transparent 25%,
+            rgba(255, 255, 255, 0.15) 50%,
+            transparent 75%
+        );
+        transform: rotate(45deg);
+        animation: buttonShine 4s infinite linear;
+    }
+    @keyframes buttonShine {
+        0% { transform: translateX(-150%) rotate(45deg); }
+        50% { transform: translateX(150%) rotate(45deg); }
+        100% { transform: translateX(150%) rotate(45deg); }
+    }
+    @media (max-width: 768px) {
+        .fetch-link {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .fetch-link i {
+            font-size: 1.2rem;
+        }
+    }
+</style>
+
+<div class="container">
+    <h2>Available Stock Symbols</h2>
+    <input type="text" id="searchBar" placeholder="Search symbols..." onkeyup="filterSymbols()">
+
+    <ul class="symbol-grid" id="symbolList">
+        {% for symbol in symbols %}
+            <li class="symbol-item">{{ symbol }}</li>
+        {% endfor %}
+    </ul>
+</div>
+<br>
+<br>
+<a href="{% url 'fetch_stock_data' %}" class="fetch-link">
+    <i class="fas fa-redo-alt"></i> Fetch Symbol
+</a>
+
+<script>
+    // Filter symbols based on search input
+    function filterSymbols() {
+        let input = document.getElementById("searchBar").value.toUpperCase();
+        let listItems = document.querySelectorAll(".symbol-item");
+
+        listItems.forEach(item => {
+            if (item.innerText.toUpperCase().includes(input)) {
+                item.style.display = "block";
+            } else {
+                item.style.display = "none";
+            }
+        });
+    }
+
+    // Copy symbol to clipboard on click
+    document.querySelectorAll('.symbol-item').forEach(item => {
+        item.addEventListener('click', () => {
+            // Copy the symbol text
+            navigator.clipboard.writeText(item.innerText).then(() => {
+                // Optional: display a notification (here using alert)
+                alert(item.innerText + " copied to clipboard!");
+            }).catch(err => {
+                console.error('Error copying text: ', err);
+            });
+        });
+    });
+</script>
+
+<style>
+    /* Notification styles */
+    .copy-notification {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #3498db, #2ecc71);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: bold;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        display: none;
+        animation: fadeInOut 3s ease-in-out;
+    }
+
+    @keyframes fadeInOut {
+        0% { opacity: 0; transform: translateY(10px); }
+        10% { opacity: 1; transform: translateY(0); }
+        90% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(10px); }
+    }
+</style>
+
+<div id="notification" class="copy-notification"></div>
+
+<script>
+    // Function to copy symbol and show notification
+    document.querySelectorAll('.symbol-item').forEach(item => {
+        item.addEventListener('click', () => {
+            navigator.clipboard.writeText(item.innerText).then(() => {
+                showNotification(item.innerText + " copied to clipboard!");
+            }).catch(err => {
+                console.error('Error copying text: ', err);
+            });
+        });
+    });
+
+    function showNotification(message) {
+        let notification = document.getElementById('notification');
+        notification.innerText = message;
+        notification.style.display = 'block';
+
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 3000);
+    }
+</script>
+
+{% endblock %}

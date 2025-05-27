@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+.page-header {
+    background: linear-gradient(90deg, #2c3e50, #3498db);
+    color: white;
+    padding: 3rem 1rem;
+    text-align: center;
+    border-radius: 0.75rem;
+    margin-bottom: 3rem;
+}
+
+.page-header h1 {
+    font-weight: 700;
+    font-size: 2.5rem;
+}
+
+.section-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+}
+
+.section {
+    margin-bottom: 3rem;
+}
+
+.card-info {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    padding: 2rem;
+    height: 100%;
+    transition: transform 0.2s ease;
+}
+
+.card-info:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.card-info i {
+    font-size: 2rem;
+    color: #3498db;
+    margin-bottom: 1rem;
+}
+
+ul {
+    padding-left: 1.2rem;
+}
+
+ul li {
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .page-header h1 {
+        font-size: 2rem;
+    }
+}
+
+.btn-gradient-custom {
+  background: linear-gradient(135deg, #3f51b5, #5c6bc0);
+  color: #fff;
+  border: none;
+  transition: all 0.3s ease;
+  padding: 0.75rem 2rem;
+  font-size: 1.125rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 16px rgba(63, 81, 181, 0.2);
+}
+
+.btn-gradient-custom:hover {
+  background: linear-gradient(135deg, #5c6bc0, #3f51b5);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(63, 81, 181, 0.3);
+}
+
+</style>
+
+<div class="container">
+    <div class="page-header">
+        <h1><i class="fas fa-lightbulb me-2"></i>How to Use Our Prediction Tools</h1>
+        <p class="mt-3 lead">Combine AI-powered sentiment and price forecasts for smarter, faster investment insights.</p>
+    </div>
+
+    <div class="row section">
+        <div class="col-md-6">
+            <div class="card-info">
+                <i class="fas fa-comments"></i>
+                <h3 class="section-title">News Sentiment Analysis</h3>
+                <p>
+                    This tool uses Natural Language Processing (NLP) to analyze thousands of recent articles, press releases, and blog posts related to a given stock.
+                </p>
+                <p>It detects whether the overall tone of news is positive, negative, or neutral, and outputs a sentiment prediction with a confidence score.</p>
+                <strong>Benefits:</strong>
+                <ul>
+                    <li>Identify market hype or panic before price moves.</li>
+                    <li>React early to major news events.</li>
+                    <li>Complement technical or fundamental analysis with real-time emotional trends.</li>
+                </ul>
+                <strong>Best Used For:</strong>
+                <ul>
+                    <li>Short-term trades.</li>
+                    <li>Breaking news-driven price movements.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card-info">
+                <i class="fas fa-chart-line"></i>
+                <h3 class="section-title">Regression Prediction Analysis</h3>
+                <p>
+                    Our regression engine is trained on historical stock prices and technical indicators like moving averages, volume, RSI, and MACD. It forecasts future price movement trends.
+                </p>
+                <p>The model uses statistical methods to estimate the likely price direction in the near future based on past data patterns.</p>
+                <strong>Benefits:</strong>
+                <ul>
+                    <li>Identify trend reversals or continuations.</li>
+                    <li>Support entry/exit decisions with data-based projections.</li>
+                    <li>Gauge medium-term investment opportunities.</li>
+                </ul>
+                <strong>Best Used For:</strong>
+                <ul>
+                    <li>Swing trading or portfolio balancing.</li>
+                    <li>Scenario testing based on price history.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="card-info">
+            <i class="fas fa-balance-scale"></i>
+            <h3 class="section-title">Combining Both Approaches</h3>
+            <p>
+                Using sentiment and regression tools together allows traders and investors to get both emotional and statistical views of a stock:
+            </p>
+            <ul>
+                <li><strong>Sentiment</strong> shows how the public and media feel right now.</li>
+                <li><strong>Regression</strong> shows what the data suggests will happen next.</li>
+            </ul>
+            <p>
+                This gives a holistic perspective — helpful for both short-term and long-term strategy formulation.
+            </p>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="card-info">
+            <i class="fas fa-lightbulb"></i>
+            <h3 class="section-title">Example Use Case</h3>
+            <p><strong>Stock: TSLA (Tesla Inc.)</strong></p>
+            <ul>
+                <li>Sentiment Analysis detects "Bullish" tone due to positive earnings and EV market expansion news.</li>
+                <li>Regression model predicts +4.5% movement in the next 7 days.</li>
+                <li><strong>Interpretation:</strong> Combined indicators suggest a potential short-term upward price movement.</li>
+            </ul>
+            <p class="text-muted">This kind of combined insight can be used to validate trade setups or flag new opportunities.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="card-info">
+            <i class="fas fa-check-circle"></i>
+            <h3 class="section-title">Tips for Better Results</h3>
+            <ul>
+                <li>Always verify predictions with current market events.</li>
+                <li>Don't rely on AI tools alone — use them to support human judgment.</li>
+                <li>Check multiple timeframes for consistency.</li>
+                <li>Use stop-losses to manage risk based on prediction confidence.</li>
+            </ul>
+        </div>
+    </div>
+
+<div class="text-center mb-5">
+  <a href="{% url 'fetch_stock_data' %}" class="btn btn-gradient-custom btn-lg mt-4">
+    Try the Prediction Tool <i class="fas fa-arrow-right ms-2"></i>
+  </a>
+</div>
+
+</div>
+{% endblock %}

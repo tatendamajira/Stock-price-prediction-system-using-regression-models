@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Stock Prediction Suite</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #3498db, #2ecc71);
+            --input-focus: rgba(52, 152, 219, 0.15);
+            --error-color: #e53e3e;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: var(--primary-gradient);
+            background-attachment: fixed;
+        }
+
+        .auth-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 3rem 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 440px;
+            transform: translateY(0);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            backdrop-filter: blur(8px);
+        }
+
+        .auth-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            color: #2d3748;
+            margin: 0 0 2rem 0;
+            font-size: 2.2rem;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            position: relative;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 1.75rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.75rem;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #f8fafc;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 4px var(--input-focus);
+            background: white;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 1.1rem;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-top: 1.5rem;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(52, 152, 219, 0.3);
+        }
+
+        .auth-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, 
+                transparent, 
+                rgba(255,255,255,0.15), 
+                transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+        }
+
+        .auth-btn:hover::after {
+            left: 150%;
+        }
+
+        .errorlist {
+            background: #fee2e2;
+            color: var(--error-color);
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            border-left: 4px solid var(--error-color);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-links {
+            text-align: center;
+            margin-top: 2rem;
+            color: #718096;
+        }
+
+        .auth-links a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .auth-links a:hover {
+            color: #2ecc71;
+            transform: translateX(3px);
+        }
+
+        @media (max-width: 480px) {
+            .auth-container {
+                margin: 1rem;
+                padding: 2rem 1.5rem;
+            }
+            
+            h2 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <h2>Stock Price Prediction (Regression ML)</h2>
+       <center><h1>Welcome</h1></center> 
+         <!-- Content block -->
+  <div class="content">
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div
+            class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}"
+            role="alert"
+            style="
+                padding: 1rem 1.25rem;
+                border-radius: 0.75rem;
+                margin-bottom: 1.25rem;
+                font-size: 1rem;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                background: {% if 'error' in message.tags %}#fee2e2{% elif 'success' in message.tags %}#e6fffa{% elif 'warning' in message.tags %}#fffbea{% else %}#e3e8f0{% endif %};
+                color: {% if 'error' in message.tags %}#e53e3e{% elif 'success' in message.tags %}#2ecc71{% elif 'warning' in message.tags %}#b7791f{% else %}#2d3748{% endif %};
+                border-left: 4px solid {% if 'error' in message.tags %}#e53e3e{% elif 'success' in message.tags %}#2ecc71{% elif 'warning' in message.tags %}#b7791f{% else %}#3498db{% endif %};
+                animation: slideIn 0.3s ease-out;"
+        >
+            {% if 'error' in message.tags %}
+                <i class="fas fa-exclamation-circle"></i>
+            {% elif 'success' in message.tags %}
+                <i class="fas fa-check-circle"></i>
+            {% elif 'warning' in message.tags %}
+                <i class="fas fa-exclamation-triangle"></i>
+            {% else %}
+                <i class="fas fa-info-circle"></i>
+            {% endif %}
+            <div>{{ message }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+        {% if form.errors %}
+            <div class="errorlist">
+                <i class="fas fa-exclamation-circle"></i>
+                <div>Invalid credentials. Please try again.</div>
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="id_username">Username</label>
+                <input type="text" 
+                       name="username" 
+                       id="id_username" 
+                       class="input-field" 
+                       placeholder="Enter your username"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_password">Password</label>
+                <input type="password" 
+                       name="password" 
+                       id="id_password" 
+                       class="input-field" 
+                       placeholder="••••••••"
+                       required>
+            </div>
+
+            <button type="submit" class="auth-btn">
+                <i class="fas fa-sign-in-alt"></i>
+                Sign In
+            </button>
+        </form>
+
+        <div class="auth-links">
+            New to our platform? 
+            <a href="{% url 'register' %}">
+                Create Account
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+    
+  <footer style="background:linear-gradient(45deg, #3498db, #2ecc71); text-align: center; padding: 1rem; margin-top: 2rem;color: white;">
+      Developed by Tatenda Majira - MSU Final Year Project
+  </footer>
+
+  <script>
+      // Mobile menu toggle
+      const menuToggle = document.querySelector('.menu-toggle');
+      const navLinks = document.querySelector('.nav-links');
+
+      menuToggle.addEventListener('click', () => {
+          navLinks.classList.toggle('active');
+          menuToggle.querySelector('i').classList.toggle('fa-times');
+      });
+
+      // Close menu when clicking outside on mobile
+      document.addEventListener('click', (e) => {
+          if (window.innerWidth <= 768) {
+              if (!e.target.closest('.nav-container')) {
+                  navLinks.classList.remove('active');
+                  menuToggle.querySelector('i').classList.remove('fa-times');
+              }
+          }
+      });
+
+      // Window resize handler
+      window.addEventListener('resize', () => {
+          if (window.innerWidth > 768) {
+              navLinks.classList.remove('active');
+              menuToggle.querySelector('i').classList.remove('fa-times');
+          }
+      });
+  </script>
+</body>
+</html>

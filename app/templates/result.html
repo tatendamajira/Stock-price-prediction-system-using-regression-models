@@ -1,0 +1,323 @@
+{% extends 'base.html' %}  
+{% block title %}Prediction Results {% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --chart-gradient: linear-gradient(135deg, #2c3e50, #3498db);
+        --metric-gradient: linear-gradient(135deg, #3498db, #2ecc71);
+    }
+
+    .analytics-header {
+        background: var(--chart-gradient);
+        padding: 5rem 1rem;
+        clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+        margin-bottom: 4rem;
+        text-align: center;
+    }
+
+    .analytics-header h1 {
+        font-size: 3rem;
+        font-weight: 700;
+    }
+
+    .chart-container {
+        background: #ffffff;
+        border-radius: 1.5rem;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+        transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        overflow: hidden;
+        margin-bottom: 3rem;
+    }
+
+    .chart-container:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+    }
+
+    .chart-header {
+        background: var(--metric-gradient);
+        padding: 1.8rem 3rem;
+        color: white;
+        position: relative;
+    }
+
+    .chart-header::after {
+        content: '';
+        position: absolute;
+        bottom: -20px;
+        left: 0;
+        width: 100%;
+        height: 40px;
+        background: linear-gradient(to bottom, rgba(255,255,255,0.15), transparent);
+    }
+
+    .chart-header h3 {
+        margin: 0;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        font-size: 1.5rem;
+    }
+
+    .analytics-viz {
+        padding: 2.5rem;
+        height: 600px;
+        background: #f8f9fa;
+    }
+
+    .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        padding: 2rem;
+    }
+
+    .metric-card {
+        background: white;
+        border-radius: 1.2rem;
+        padding: 2rem;
+        box-shadow: 0 6px 30px rgba(52, 152, 219, 0.1);
+        transition: all 0.3s ease;
+        border-left: 4px solid;
+    }
+
+    .metric-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .metric-card.performance {
+        border-color: #e74c3c;
+        background: linear-gradient(135deg, #fff5f5, #ffffff);
+    }
+
+    .metric-card.risk {
+        border-color: #2ecc71;
+        background: linear-gradient(135deg, #f5fffd, #ffffff);
+    }
+
+    .metric-value {
+        font-size: 2.8rem;
+        font-weight: 700;
+        margin: 1.5rem 0;
+        color: #2c3e50;
+        position: relative;
+    }
+
+    .metric-value::after {
+        content: '';
+        position: absolute;
+        bottom: -15px;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background: currentColor;
+    }
+
+    .insight-panel {
+        background: white;
+        border-radius: 1.2rem;
+        padding: 2.5rem;
+        margin: 3rem 0;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.06);
+        border-top: 4px solid var(--primary-color);
+    }
+
+    .cta-container {
+        text-align: center;
+        padding: 4rem 0;
+        background: #f8f9fa;
+        margin-top: 4rem;
+        clip-path: polygon(0 20%, 100% 0, 100% 100%, 0 100%);
+    }
+
+    .neu-btn {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        padding: 1.2rem 3.5rem;
+        border-radius: 1.5rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        box-shadow: 0 10px 30px rgba(52, 152, 219, 0.3);
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        display: inline-flex;
+        align-items: center;
+        gap: 1rem;
+        border: none;
+    }
+
+    .neu-btn:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 15px 40px rgba(52, 152, 219, 0.4);
+    }
+
+    @media (max-width: 992px) {
+        .analytics-header {
+            padding: 3rem 1rem;
+            clip-path: polygon(0 0, 100% 0, 100% 95%, 0 100%);
+        }
+        
+        .analytics-viz {
+            height: 400px;
+            padding: 1.5rem;
+        }
+        
+        .metric-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .cta-container {
+            clip-path: none;
+            padding: 3rem 0;
+        }
+    }
+</style>
+
+<div class="analytics-header text-white">
+    <div class="container">
+        <h1 class="display-4 mb-4" style="color: white;">Stock Analysis</h1>
+        <div class="d-flex justify-content-center gap-3 align-items-center">
+            <span class="badge bg-light text-dark fs-5 py-2 px-3 rounded-pill" style="color: white;">
+                <i class="fas fa-chart-bar me-2" style="color: white;"></i>{{ symbol }}
+            </span>
+            <span class="badge bg-light text-dark fs-5 py-2 px-3 rounded-pill" style="color: white;">
+                <i class="fas fa-brain me-2" style="color: white;"></i>{{ model_choice }} Model
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Market Visualization -->
+<div class="container">
+    <div class="chart-container">
+        <div class="chart-header">
+            <h3><i class="fas fa-chart-area"></i> Price Evolution Analysis</h3>
+        </div>
+        <div class="analytics-viz">
+            <img src="data:image/png;base64,{{ historical_image_base64 }}" 
+                 alt="Historical Analysis" 
+                 class="w-100 h-100 object-fit-contain">
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <div class="chart-header">
+            <h3><i class="fas fa-project-diagram"></i> Predictive Forecast Model</h3>
+        </div>
+        <div class="analytics-viz">
+            <img src="data:image/png;base64,{{ prediction_image_base64 }}" 
+                 alt="Prediction Model" 
+                 class="w-100 h-100 object-fit-contain">
+        </div>
+    </div>
+</div>
+
+<!-- Quantitative Analysis -->
+<div class="container">
+    <div class="metric-grid">
+        <!-- Model Performance -->
+        <div class="metric-card performance">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="fas fa-microchip fs-3 text-danger"></i>
+                <h4 class="m-0">Model Performance</h4>
+            </div>
+            <div class="metric-value text-danger">
+                {{ mae|floatformat:4 }}
+                <small class="fs-6 text-muted d-block mt-1">MAE</small>
+            </div>
+            <div class="metric-value text-warning">
+                {{ rmse|floatformat:4 }}
+                <small class="fs-6 text-muted d-block mt-1">RMSE</small>
+            </div>
+            <div class="metric-value text-success">
+                {{ r2|floatformat:4 }}
+                <small class="fs-6 text-muted d-block mt-1">R² Score</small>
+            </div>
+        </div>
+
+        <!-- Risk Metrics -->
+        <div class="metric-card risk">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="fas fa-shield-alt fs-3 text-success"></i>
+                <h4 class="m-0">Risk Parameters</h4>
+            </div>
+            <div class="metric-value text-info">
+                ${{ current_close|floatformat:2 }}
+                <small class="fs-6 text-muted d-block mt-1">Current Price</small>
+            </div>
+            <div class="metric-value text-primary">
+                ${{ risk_management.atr_value|floatformat:2 }}
+                <small class="fs-6 text-muted d-block mt-1">ATR (14-day)</small>
+            </div>
+            <div class="metric-value text-success">
+                ${{ recommended_entry|floatformat:2 }}
+                <small class="fs-6 text-muted d-block mt-1">Optimal Entry</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Strategic Insights -->
+    <div class="insight-panel">
+        <div class="row g-4">
+            <!-- Model Interpretation Card -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <i class="fas fa-info-circle fs-2 text-primary"></i>
+                            <h5 class="mb-0">Model Interpretation</h5>
+                        </div>
+                        <p class="text-muted mb-0">
+                            The model shows an MAE of {{ mae|floatformat:4 }} and an R² score of {{ r2|floatformat:4 }},
+                            indicating that the predictive performance is 
+                            {% if r2 > 0.85 %}<strong>strong</strong>{% else %}<strong>moderate</strong>{% endif %}.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trading Strategy Card -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <i class="fas fa-lightbulb fs-2 text-success"></i>
+                            <h5 class="mb-0">Trading Strategy</h5>
+                        </div>
+                        <ul class="list-unstyled text-muted mb-0">
+                            <li class="mb-2">
+                                <strong>Predicted Trend:</strong> {{ risk_management.predicted_pattern }}
+                            </li>
+                            <li class="mb-2">
+                                <strong>Trading Action:</strong> {{ risk_management.action }}
+                            </li>
+                            <li class="mb-2">
+                                <strong>Recommended Entry:</strong>
+                                ${{ recommended_entry|floatformat:2 }}
+                            </li>
+                            <li class="mb-2">
+                                <strong>Stop-Loss:</strong>
+                                ${{ risk_management.stop_loss|floatformat:2 }}
+                            </li>
+                            <li>
+                                <strong>Take-Profit:</strong>
+                                ${{ risk_management.take_profit|floatformat:2 }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="cta-container">
+    <a href="{% url 'fetch_stock_data' %}" class="neu-btn" style="text-decoration: none;">
+        <i class="fas fa-rocket"></i>
+        New Analysis
+    </a>
+</div>
+{% endblock %}

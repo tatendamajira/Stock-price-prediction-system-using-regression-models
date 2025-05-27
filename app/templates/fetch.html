@@ -1,0 +1,301 @@
+{% extends 'base.html' %}
+{% block title %}Advanced Stock Prediction{% endblock %}
+
+{% block content %}
+<style>
+    .card {
+        background: var(--text-light);
+        border-radius: 1rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        border: none;
+    }
+
+    .card:hover {
+        transform: translateY(-0.5rem);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        padding: 2.5rem 1rem;
+        border-bottom: none;
+    }
+
+    .form-title {
+        font-weight: 700;
+        letter-spacing: -0.025em;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .error-alert {
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 1.25rem;
+        border-radius: 0.75rem;
+        border-left: 4px solid #dc2626;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+        font-size: 0.925rem;
+    }
+
+    .custom-input {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 0.75rem;
+        padding: 0.875rem 1.25rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .custom-input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+        background: #ffffff;
+    }
+
+    /* Enhanced Dropdown Styling */
+    .model-select {
+        background: #f8fafc url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='%233498db' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3e%3c/svg%3e") no-repeat right 1rem center/16px 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 0.75rem;
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        appearance: none;
+        color: #334155;
+    }
+
+    .model-select:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 2px 8px rgba(52, 152, 219, 0.1);
+    }
+
+    .model-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='%232980b9' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3e%3c/svg%3e");
+    }
+
+    .model-select option {
+        padding: 1rem;
+        background: white;
+        color: #334155;
+        transition: all 0.2s ease;
+    }
+
+    .model-select option:hover {
+        background: var(--primary-color) !important;
+        color: white;
+    }
+
+    .model-select option:checked {
+        background: var(--primary-color);
+        color: white;
+        font-weight: 600;
+    }
+
+    /* Enhanced Button Styling */
+    .submit-btn {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border: none;
+        padding: 1.25rem 3rem;
+        border-radius: 1rem;
+        color: white;
+        font-weight: 600;
+        letter-spacing: 0.05rem;
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 24px rgba(52, 152, 219, 0.2);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 32px rgba(52, 152, 219, 0.3);
+        background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+    }
+
+    .submit-btn i {
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
+    }
+
+    .submit-btn:hover i {
+        transform: translateX(3px);
+    }
+
+    .submit-btn::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+            45deg,
+            transparent,
+            rgba(255, 255, 255, 0.15),
+            transparent
+        );
+        transform: rotate(45deg);
+        transition: all 0.6s ease;
+    }
+
+    .submit-btn:hover::after {
+        left: 150%;
+    }
+
+    @media (max-width: 768px) {
+        .card {
+            margin: 1rem;
+            border-radius: 0.75rem;
+        }
+        
+        .card-header {
+            padding: 1.75rem 1rem;
+        }
+        
+        .form-title {
+            font-size: 1.5rem;
+        }
+        
+        .submit-btn {
+            padding: 1rem 2rem;
+            font-size: 0.95rem;
+        }
+    }
+    
+</style>
+
+<div class="container my-5">
+    <div class="card">
+        <div class="card-header text-white">
+           <center><h2 class="form-title text-center mb-3">Stock Price Prediction (Regression ML)</h2></center> 
+            <center><p class="text-center text-white/90 mb-0">Leverage machine learning for predictive market analysis</p></center>
+        </div>
+        
+        <div class="card-body p-4">
+            {% if error %}
+            <div class="error-alert">
+                <i class="fas fa-exclamation-circle"></i>
+                <div>
+                    <strong>Data Error:</strong> {{ error }}
+                </div>
+            </div>
+            {% endif %}
+<center>
+            <form method="post" novalidate class="py-3">
+                {% csrf_token %}
+                
+                <div class="row g-4">
+                    <!-- Left Column -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="symbol" class="form-label">Stock Symbol</label>
+                            <input type="text" class="form-control custom-input" 
+                                   name="symbol" id="symbol" 
+                                   placeholder="e.g., AAPL" required>
+                        </div>
+                        <br>
+
+                        <div class="form-group mt-4">
+                            <label for="period" class="form-label">Historical Period</label>
+                            <input type="text" class="form-control custom-input" 
+                                   name="period" id="period" 
+                                   value="1y" required>
+                        </div>
+                        <br>
+
+                        <div class="form-group mt-4">
+                            <label for="interval" class="form-label">Trading Interval</label>
+                            <input type="text" class="form-control custom-input" 
+                                   name="interval" id="interval" 
+                                   value="1d" required>
+                        </div>
+                        <br>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="model_choice" class="form-label">ML Model Selection</label>
+                            <select class="form-control model-select" 
+                                    name="model_choice" id="model_choice">
+                                <option value="linear">Linear Regression</option>
+                                <option value="random_forest">Random Forest (High Accuracy)</option>
+                                <option value="svr">Support Vector Machine (SVR)</option>
+                                <option value="gradient_boosting">Gradient Boosting (Advanced)</option>
+                            </select>
+                        </div>
+                        <br>
+
+                        <hr class="my-4">
+
+                        <h5 class="text-center mb-4">Risk Parameters</h5>
+                        
+                        <div class="form-group">
+                            <label for="atr_multiplier_stoploss" class="form-label">ATR Stop-Loss Multiplier</label>
+                            <input type="number" step="0.1" 
+                                   class="form-control custom-input" 
+                                   name="atr_multiplier_stoploss" 
+                                   id="atr_multiplier_stoploss" 
+                                   value="1.5" required>
+                        </div>
+                        <br>
+
+                        <div class="form-group mt-4">
+                            <label for="atr_multiplier_takeprofit" class="form-label">ATR Take-Profit Multiplier</label>
+                            <input type="number" step="0.1" 
+                                   class="form-control custom-input" 
+                                   name="atr_multiplier_takeprofit" 
+                                   id="atr_multiplier_takeprofit" 
+                                   value="2.0" required>
+                        </div>
+                        <br>
+                    </div>
+
+                </div>
+              </center>
+              <br>
+              <br>
+                <center>
+
+                <div class="d-grid mt-5">
+                    <button type="submit" class="submit-btn" style="background-color: #2ecc71;">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Generate Predictive Analysis
+                    </button>
+                </div>
+
+              </center>
+
+                
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

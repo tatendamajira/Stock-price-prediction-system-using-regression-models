@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+/* News Prediction Styles */
+.news-prediction-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    perspective: 1000px;
+}
+
+.sentiment-header {
+    background: linear-gradient(135deg, #2980b9 0%, #2c3e50 100%);
+    color: white;
+    padding: 2.5rem;
+    text-align: center;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    font-size: 1.75rem;
+    font-weight: 700;
+    box-shadow: 0 10px 30px rgba(41, 128, 185, 0.2);
+    transform-style: preserve-3d;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.sentiment-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+    z-index: -1;
+    animation: pulse 8s infinite alternate;
+}
+
+@keyframes pulse {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(50px, 50px); }
+}
+
+.news-prediction-form {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    padding: 3rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.news-prediction-form:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+}
+
+.news-prediction-form h2 {
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 2rem;
+    text-align: center;
+    position: relative;
+}
+
+.news-prediction-form h2::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    margin: 1rem auto 0;
+    border-radius: 2px;
+}
+
+.btn-gradient {
+    background: linear-gradient(45deg, #3498db, #2ecc71);
+    color: #fff;
+    border: none;
+    font-weight: 600;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    width: 100%;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.btn-gradient:hover {
+    background: linear-gradient(45deg, #2c80b4, #27ae60);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+}
+
+.btn-gradient:active {
+    transform: translateY(0);
+}
+
+.input-group {
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.input-group-text {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: #fff;
+    border: none;
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+    padding: 0.75rem 1.25rem;
+    box-shadow: inset -2px 0 5px rgba(0,0,0,0.05);
+}
+
+.form-control {
+    border: 2px solid #e9ecef;
+    border-left: none;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    padding: 0.75rem 1.25rem;
+    height: calc(1.5em + 1.5rem);
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    box-shadow: none;
+}
+
+.form-control:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.15);
+    outline: none;
+}
+
+/* Floating animation for icons */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+.fa-brain {
+    animation: float 3s ease-in-out infinite;
+    margin-right: 10px;
+}
+
+/* Decorative elements */
+.decorative-circle {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.1;
+    z-index: -1;
+}
+
+.circle-1 {
+    width: 150px;
+    height: 150px;
+    background: #3498db;
+    top: -50px;
+    right: -50px;
+}
+
+.circle-2 {
+    width: 100px;
+    height: 100px;
+    background: #2ecc71;
+    bottom: -30px;
+    left: -30px;
+}
+
+@media (max-width: 768px) {
+    .news-prediction-container {
+        padding: 0 1.5rem;
+    }
+    
+    .news-prediction-form {
+        padding: 2rem;
+    }
+    
+    .sentiment-header {
+        padding: 1.75rem;
+        font-size: 1.5rem;
+    }
+    
+    .btn-gradient {
+        padding: 0.9rem 1.25rem;
+    }
+}
+
+/* Results section styling (for when you add results) */
+.results-container {
+    margin-top: 3rem;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+<div class="news-prediction-container">
+    <div class="sentiment-header">
+        <i class="fas fa-brain"></i>AI-Powered Sentiment Forecast
+    </div>
+    
+    <div class="news-prediction-form">
+        <div class="decorative-circle circle-1"></div>
+        <div class="decorative-circle circle-2"></div>
+        
+        <h2><i class="fas fa-newspaper me-2"></i>News-Based Stock Prediction</h2>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <div class="input-group mb-4">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" name="symbol" class="form-control" 
+                           placeholder="Enter stock symbol (e.g., AAPL, TSLA, MSFT)" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-gradient">
+                <i class="fas fa-chart-line me-2"></i>Analyze News Sentiment
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

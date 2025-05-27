@@ -1,0 +1,57 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score
+
+# Regression models
+from sklearn.linear_model import LinearRegression, Ridge, Lasso
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from sklearn.svm import SVR
+from sklearn.neighbors import KNeighborsRegressor
+
+# 1. Load Excel file
+file_path = 'yahoo_data.xlsx'  # Ensure this file exists in the same folder
+df = pd.read_excel(file_path)
+
+# 2. Clean and preprocess
+df.columns = [col.strip().replace('*', '').replace(' ', '_') for col in df.columns]
+df['Date'] = pd.to_datetime(df['Date'])
+df = df.sort_values('Date')
+df = df.dropna()
+
+# 3. Feature engineering
+df['MA_5'] = df['Close'].rolling(window=5).mean()
+df['MA_10'] = df['Close'].rolling(window=10).mean()
+df = df.dropna()
+
+# 4. Define features and target
+features = ['Open', 'High', 'Low', 'MA_5', 'MA_10']
+target = 'Close'
+
+X = df[features]
+y = df[target]
+
+# 5. Split into train/test sets
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# 6. Define models
+models = {
+    "Linear Regression": LinearRegression(),
+    "Ridge Regression": Ridge(),
+    "Lasso Regression": Lasso(),
+    "Decision Tree": DecisionTreeRegressor(),
+    "Random Forest": RandomForestRegressor(),
+    "Gradient Boosting": GradientBoostingRegressor(),
+    "Support Vector Regressor": SVR(),
+    "K-Nearest Neighbors": KNeighborsRegressor()
+}
+
+# 7. Train and evaluate models
+print("\nModel Performance:\n--------------------")
+for name, model in models.items():
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    score = r2_score(y_test, y_pred)
+    print(f"{name}: R² score = {score:.4f}")

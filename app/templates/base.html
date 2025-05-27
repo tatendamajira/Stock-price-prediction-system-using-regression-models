@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Stock Price Prediction</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        nav {
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        nav a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-wrap: wrap;
+            }
+
+            .nav-links {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                background: linear-gradient(45deg, #2e86c1, #27ae60);
+                margin-top: 1rem;
+                border-radius: 5px;
+                padding: 1rem 0;
+            }
+
+            .nav-links.active {
+                display: flex;
+                animation: slideDown 0.3s ease-out;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            nav a {
+                width: 100%;
+                padding: 1rem;
+                margin: 0.25rem 0;
+            }
+        }
+
+        /* Content */
+        .content {
+            padding: 2rem 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Animations */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .alert {
+        padding: .75rem 1rem;
+        margin: 1rem auto;
+        max-width: 600px;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        }
+        .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        }
+        .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        }
+        /* slide-and-fade in from top */
+        @keyframes slideFadeIn {
+        0%   { opacity: 0; transform: translateY(-20px); }
+        100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* slide-and-fade out to top */
+        @keyframes slideFadeOut {
+        0%   { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(-20px); }
+        }
+
+        .messages .alert {
+        /* initial animation on mount */
+        animation: slideFadeIn 0.4s ease-out forwards;
+        position: relative;
+        overflow: hidden;
+        transition: max-height 0.4s ease-out;
+        }
+
+        /* when we add .fade-out via JS, this runs */
+        .messages .alert.fade-out {
+        animation: slideFadeOut 0.4s ease-in forwards;
+        }
+        
+
+    </style>
+</head>
+<body>
+    <!-- Navigation bar -->
+<nav>
+  <div class="nav-container">
+    <div class="nav-brand" style="color: white;">
+      <i class="fas fa-chart-line"></i>
+      SPPS
+    </div>
+
+    <!-- Show toggle button on mobile -->
+    <button class="menu-toggle" aria-label="Toggle navigation">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="nav-links">
+      {% if user.is_authenticated %}
+       
+
+        <a href="{% url 'fetch_stock_data' %}">
+          <i class="fas fa-download"></i>
+          Fetch Data
+        </a>
+
+        <a href="{% url 'list_symbols' %}">
+          <i class="fas fa-th-list"></i>
+          Symbols
+        </a>
+
+        <a href="{% url 'news_prediction' %}">
+          <i class="fas fa-newspaper"></i>
+          News Prediction
+        </a>
+
+        <a href="{% url 'train_model' %}">
+          <i class="fas fa-robot"></i>
+          Train Model
+        </a>
+
+        <a href="{% url 'how' %}">
+          <i class="fas fa-question-circle"></i>
+          How It Works
+        </a>
+
+         <span class="nav-username" style="color: white; margin-right: 1rem;">
+          <i class="fas fa-user-circle"></i>
+          Hello, {{ user.username }}
+        </span>
+      {% endif %}
+
+      {% if user.is_authenticated %}
+        <a href="{% url 'logout' %}">
+          <i class="fas fa-sign-out-alt"></i>
+          Logout
+        </a>
+      {% else %}
+        <a href="{% url 'login' %}">
+          <i class="fas fa-sign-in-alt"></i>
+          Login
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+
+  <!-- Content block -->
+  <div class="content">
+{% if messages %}
+  <div class="messages">
+    {% for message in messages %}
+      <div
+        class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}"
+        role="alert"
+      >
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- ... rest of page ... -->
+
+<!-- auto‑dismiss script -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.messages .alert').forEach((alert) => {
+      setTimeout(() => {
+        alert.classList.add('fade-out');
+        alert.addEventListener('animationend', () => alert.remove());
+      }, 4000);
+    });
+  });
+</script>
+
+
+
+      {% block content %}
+      {% endblock %}
+  </div>
+
+  <footer style="background:linear-gradient(45deg, #3498db, #2ecc71); text-align: center; padding: 1rem; margin-top: 2rem;color: white;">
+      Developed by Tatenda Majira - MSU Final Year Project
+  </footer>
+
+  <script>
+      // Mobile menu toggle
+      const menuToggle = document.querySelector('.menu-toggle');
+      const navLinks = document.querySelector('.nav-links');
+
+      menuToggle.addEventListener('click', () => {
+          navLinks.classList.toggle('active');
+          menuToggle.querySelector('i').classList.toggle('fa-times');
+      });
+
+      // Close menu when clicking outside on mobile
+      document.addEventListener('click', (e) => {
+          if (window.innerWidth <= 768) {
+              if (!e.target.closest('.nav-container')) {
+                  navLinks.classList.remove('active');
+                  menuToggle.querySelector('i').classList.remove('fa-times');
+              }
+          }
+      });
+
+      // Window resize handler
+      window.addEventListener('resize', () => {
+          if (window.innerWidth > 768) {
+              navLinks.classList.remove('active');
+              menuToggle.querySelector('i').classList.remove('fa-times');
+          }
+      });
+  </script>
+</body>
+</html>
